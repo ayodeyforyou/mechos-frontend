@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authApi } from '../lib/api'
 import { useAuth } from '../lib/AuthContext'
 import { useToast } from '../hooks/useToast'
+import { supabaseAuth } from '../lib/supabase'
 import { Toast, Spinner } from '../components/UI'
 
 export default function Login() {
@@ -25,21 +25,12 @@ export default function Login() {
 
     setLoading(true)
     try {
-      // Try direct Supabase OTP first, fallback to backend endpoint
-      try {
-        await authApi.post('/auth/v1/otp', {
-          phone,
-          data: {}
-        })
-      } catch (supabaseErr) {
-        // Fallback to backend endpoint
-        await authApi.post('/auth/request-otp', { phone })
-      }
-      
+      // Use Supabase SDK for OTP
+      await supabaseAuth.requestOtp(phone)
       success('OTP sent to your phone!')
       setStep('otp')
     } catch (err) {
-      setErrorMsg(err.response?.data?.error || err.message || 'Failed to send OTP')
+      setErrorMsg(err.message || 'Failed to send OTP')
     } finally {
       setLoading(false)
     }
@@ -54,32 +45,20 @@ export default function Login() {
 
     setLoading(true)
     try {
-      let response
+      // Verify OTP via Supabase SDK
+      const response = await supabaseAuth.verifyOtp(phone, otp)
       
-      // Try direct Supabase verification first
-      try {
-        const supabaseResponse = await authApi.post('/auth/v1/verify', {
-          type: 'sms',
-          phone,
-          token: otp
-        })
-        
-        // Format Supabase response to match expected structure
-        response = {
-          data: {
-            token: supabaseResponse.data.session?.access_token,
-            mechanic: supabaseResponse.data.user || { id: supabaseResponse.data.user?.id }
-          }
-        }
-      } catch (supabaseErr) {
-        // Fallback to backend endpoint
-        response = await authApi.post('/auth/verify-otp', { phone, otp })
+      // Create mechanic object from Supabase user
+      const mechanic = {
+        id: response.user?.id,
+        phone: response.user?.phone,
+        email: response.user?.email
       }
       
-      login(response.data.token, response.data.mechanic)
+      login(response.token, mechanic)
       navigate('/')
     } catch (err) {
-      setErrorMsg(err.response?.data?.error || err.message || 'Invalid OTP')
+      setErrorMsg(err.message || 'Invalid OTP')
     } finally {
       setLoading(false)
     }

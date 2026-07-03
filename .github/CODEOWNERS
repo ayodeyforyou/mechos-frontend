@@ -1,0 +1,53 @@
+# CODEOWNERS file for MechOS Frontend
+
+# This file defines code ownership and auto-assigns reviewers
+
+# Default owner
+
+- @YOUR_GITHUB_USERNAME
+
+# Authentication & Auth flow
+
+/src/lib/AuthContext.jsx @YOUR_GITHUB_USERNAME
+/src/lib/api.js @YOUR_GITHUB_USERNAME
+/src/lib/supabase.js @YOUR_GITHUB_USERNAME
+/src/pages/Login.jsx @YOUR_GITHUB_USERNAME
+
+# Core pages
+
+/src/pages/Home.jsx @YOUR_GITHUB_USERNAME
+/src/pages/Profile.jsx @YOUR_GITHUB_USERNAME
+
+# Customer features
+
+/src/pages/CustomerList.jsx @YOUR_GITHUB_USERNAME
+/src/pages/AddCustomer.jsx @YOUR_GITHUB_USERNAME
+/src/pages/CustomerDetail.jsx @YOUR_GITHUB_USERNAME
+
+# Vehicle management
+
+/src/pages/AddVehicle.jsx @YOUR_GITHUB_USERNAME
+
+# Job management - critical
+
+/src/pages/AddJob.jsx @YOUR_GITHUB_USERNAME
+/src/pages/JobDetail.jsx @YOUR_GITHUB_USERNAME
+
+# Reminders feature
+
+/src/pages/Reminders.jsx @YOUR_GITHUB_USERNAME
+
+# UI Components
+
+/src/components/UI.jsx @YOUR_GITHUB_USERNAME
+/src/index.css @YOUR_GITHUB_USERNAME
+
+# Configuration & Build
+
+vite.config.js @YOUR_GITHUB_USERNAME
+netlify.toml @YOUR_GITHUB_USERNAME
+package.json @YOUR_GITHUB_USERNAME
+
+# Documentation
+
+\*.md @YOUR_GITHUB_USERNAME

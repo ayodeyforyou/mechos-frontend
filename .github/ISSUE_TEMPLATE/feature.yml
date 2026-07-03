@@ -1,0 +1,54 @@
+name: Feature Request
+description: Suggest a new feature for MechOS
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for MechOS? We'd love to hear it! Please describe your feature request below.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Clear description of the feature
+      placeholder: "It would be great to have..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem It Solves
+      description: What problem does this solve for mechanics?
+      placeholder: "This would save time by..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Solution
+      description: How should it work?
+      placeholder: |
+        1. Add a button on the job page
+        2. Clicking it should...
+        3. Then show...
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Other ways this could be done
+      placeholder: "We could also..."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I've searched for similar feature requests
+          required: true
+        - label: This improves the mechanic workflow
+          required: true

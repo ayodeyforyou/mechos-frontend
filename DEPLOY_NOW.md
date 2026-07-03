@@ -34,6 +34,7 @@
 ### Step 3️⃣: Add Environment Variables
 
 In Netlify Dashboard:
+
 1. **Site settings** → **Build & Deploy** → **Environment**
 2. Click "Add variable"
 3. Add these three:
@@ -67,6 +68,7 @@ Get these from: Supabase → Settings → API Keys
 **Now:** Using official Supabase SDK → Handles auth properly → Works everywhere
 
 The SDK:
+
 - ✅ Handles CORS automatically
 - ✅ Manages sessions properly
 - ✅ Works on localhost, Netlify, anywhere
@@ -77,6 +79,7 @@ The SDK:
 ## 📱 Test on Mobile
 
 After deployment:
+
 1. Open Netlify URL on phone
 2. Test login with phone number
 3. Test OTP flow
@@ -88,21 +91,25 @@ After deployment:
 ## 🚨 Troubleshooting
 
 **"Failed to send OTP"**
+
 - Check phone auth enabled in Supabase
 - Check phone number format (+234...)
 - Check environment variables in Netlify are correct
 
 **"CORS error"**
+
 - Make sure your Netlify URL is in Supabase redirect URLs
 - Wait 5 minutes after adding URL
 - Clear browser cache and reload
 
 **"Page is blank"**
+
 - Check Netlify build logs (Deploys tab)
 - Check DevTools console for errors
 - Verify environment variables are set
 
 **"Can't reach home page after login"**
+
 - Check Netlify logs for build errors
 - Verify all pages exist
 - Check React Router in browser console
@@ -129,6 +136,7 @@ After deployment:
 ## ✨ You're Ready!
 
 Everything is set up. Just:
+
 1. Configure Supabase redirect URLs
 2. Connect Netlify to GitHub
 3. Add environment variables

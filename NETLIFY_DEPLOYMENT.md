@@ -60,13 +60,14 @@ In Netlify Dashboard:
 2. Click "Edit variables"
 3. Add these three variables:
 
-| Variable | Value | Example |
-|----------|-------|---------|
-| `VITE_API_URL` | Your Supabase URL | `https://abc123.supabase.co` |
-| `VITE_SUPABASE_URL` | Your Supabase URL | `https://abc123.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | Your Public Anon Key | `sb_public_xyz...` |
+| Variable                 | Value                | Example                      |
+| ------------------------ | -------------------- | ---------------------------- |
+| `VITE_API_URL`           | Your Supabase URL    | `https://abc123.supabase.co` |
+| `VITE_SUPABASE_URL`      | Your Supabase URL    | `https://abc123.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Your Public Anon Key | `sb_public_xyz...`           |
 
 ⚠️ **Important:**
+
 - Never commit these to git
 - Use the same credentials from `.env.local`
 - The keys are public (safe to expose in frontend)
@@ -76,6 +77,7 @@ In Netlify Dashboard:
 ## 🚀 Step 5: Deploy
 
 1. Push to GitHub main branch
+
 ```bash
 git add .
 git commit -m "your message"
@@ -100,19 +102,23 @@ git push origin main
 ### Troubleshooting OTP Issues:
 
 **Problem: "No 'Access-Control-Allow-Origin'" CORS error**
+
 - ✅ Fixed! We now use Supabase SDK which handles CORS properly
 
 **Problem: OTP not sending**
+
 - Check phone auth is enabled in Supabase
 - Check phone number format (include country code)
 - Check SMS credits/configuration in Supabase
 
 **Problem: App loads blank page**
+
 - Check environment variables in Netlify are set correctly
 - Check build logs in Netlify Dashboard
 - Open browser DevTools → Network tab for errors
 
 **Problem: Routes don't work**
+
 - ✅ Fixed! `netlify.toml` has SPA routing configured
 
 ---
@@ -154,12 +160,14 @@ No manual deploy needed!
 ## 🔐 Security Best Practices
 
 ✅ **Do:**
+
 - Store secrets in Netlify environment variables (not git)
 - Use HTTPS (Netlify provides free SSL)
 - Keep dependencies updated (`npm audit fix`)
 - Monitor logs for errors
 
 ❌ **Don't:**
+
 - Commit `.env.local` to git
 - Hardcode API keys in source code
 - Use production keys in development
@@ -179,6 +187,7 @@ No manual deploy needed!
 ## 🆘 Debugging Production Issues
 
 ### View Logs:
+
 ```bash
 # See recent builds
 netlify deploy --list
@@ -188,11 +197,13 @@ netlify deploy --json | jq '.logs'
 ```
 
 ### Browser DevTools:
+
 1. F12 → Console
 2. Check for errors
 3. Check Network tab for failed API calls
 
 ### Netlify Logs:
+
 1. Netlify Dashboard → Deploys
 2. Click latest deploy
 3. View build logs and function logs
@@ -202,6 +213,7 @@ netlify deploy --json | jq '.logs'
 ## 🎉 You're Live!
 
 Your MechOS app is now:
+
 - ✅ Deployed to production
 - ✅ Running on HTTPS
 - ✅ Connected to Supabase
@@ -210,6 +222,7 @@ Your MechOS app is now:
 - ✅ OTP authentication working
 
 **Next steps:**
+
 - [ ] Test all features
 - [ ] Get feedback from mechanics
 - [ ] Monitor usage in Netlify Analytics

@@ -5,6 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  SECRETS_SCAN_OMIT_PATHS = "DEPLOYMENT_CHECKLIST.md,SETUP_COMPLETE.md,SUPABASE_SETUP.md,GITHUB_SETUP.md,.env.example,README.md"
 
 # Redirect all 404s to index.html for React Router
 [[redirects]]

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import api from '../lib/api'
+import { apiGet, apiPost, apiPatch, apiDelete } from '../lib/api'
 import { useToast } from '../hooks/useToast'
 import { TopBar, Icon, fmt, Spinner, Toast } from '../components/UI'
 
@@ -98,7 +98,7 @@ export default function AddJob() {
 
     setLoading(true)
     try {
-      const { data: jobData } = await api.post(`/api/vehicles/${vehicleId}/jobs`, {
+      const { data: jobData } = await apiPost(`/api/vehicles/${vehicleId}/jobs`, {
         description: description.trim(),
         labour_cost: parseFloat(labourCost || 0),
         parts_cost: parts.length > 0 ? partsTotalCost : parseFloat(partsCost || 0),
@@ -115,7 +115,7 @@ export default function AddJob() {
         for (const [file, type] of [[beforeFile, 'before'], [afterFile, 'after']]) {
           if (!file) continue
           try {
-            const { data: uploadData } = await api.post(`/api/jobs/${jobData.id}/photos/upload-url`, {
+            const { data: uploadData } = await apiPost(`/api/jobs/${jobData.id}/photos/upload-url`, {
               photo_type: type,
               file_size_kb: Math.round(file.size / 1024)
             })

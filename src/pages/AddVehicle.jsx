@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import api from '../lib/api'
+import { apiGet, apiPost, apiPatch, apiDelete } from '../lib/api'
 import { useToast } from '../hooks/useToast'
 import { TopBar, Spinner, Toast } from '../components/UI'
 
@@ -22,7 +22,7 @@ export default function AddVehicle() {
 
     setLoading(true)
     try {
-      const { data } = await api.post(`/api/customers/${customerId}/vehicles`, {
+      const { data } = await apiPost(`/api/customers/${customerId}/vehicles`, {
         make: make.trim(),
         model: model.trim(),
         year: year ? parseInt(year) : null,

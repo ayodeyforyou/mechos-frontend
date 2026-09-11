@@ -1,45 +1,41 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+// src/lib/AuthContext.jsx
+import { createContext, useContext, useState, useCallback } from 'react'
 
-const AuthContext = createContext()
+const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [mechanic, setMechanic] = useState(null)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [mechanic, setMechanic] = useState(() => {
+    try {
+      const stored = localStorage.getItem('mechos_mechanic')
+      return stored ? JSON.parse(stored) : null
+    } catch { return null }
+  })
 
-  useEffect(() => {
-    const token = localStorage.getItem('mechanic_token')
-    const user = localStorage.getItem('mechanic_user')
-    if (token && user) {
-      setMechanic(JSON.parse(user))
-      setIsLoggedIn(true)
-    }
-    setLoading(false)
+  const login = useCallback((token, mechanicData) => {
+    localStorage.setItem('mechos_token', token)
+    localStorage.setItem('mechos_mechanic', JSON.stringify(mechanicData))
+    setMechanic(mechanicData)
   }, [])
 
-  const login = (token, userData) => {
-    localStorage.setItem('mechanic_token', token)
-    localStorage.setItem('mechanic_user', JSON.stringify(userData))
-    setMechanic(userData)
-    setIsLoggedIn(true)
-  }
-
-  const logout = () => {
-    localStorage.removeItem('mechanic_token')
-    localStorage.removeItem('mechanic_user')
+  const logout = useCallback(() => {
+    localStorage.removeItem('mechos_token')
+    localStorage.removeItem('mechos_mechanic')
     setMechanic(null)
-    setIsLoggedIn(false)
-  }
+  }, [])
+
+  // isLoggedIn is true whether using a real JWT or the dev skip token
+  const isLoggedIn = Boolean(
+    mechanic && localStorage.getItem('mechos_token')
+  )
+
+  // True when using the dev bypass — used by api.js to skip real API calls
+  const isDevMode = localStorage.getItem('mechos_token') === 'dev-token-skip'
 
   return (
-    <AuthContext.Provider value={{ mechanic, isLoggedIn, login, logout, loading }}>
+    <AuthContext.Provider value={{ mechanic, isLoggedIn, isDevMode, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider')
-  return ctx
-}
+export const useAuth = () => useContext(AuthContext)

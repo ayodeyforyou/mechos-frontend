@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../lib/api'
+import { apiGet, apiPost, apiPatch, apiDelete } from '../lib/api'
 import { useToast } from '../hooks/useToast'
 import { TopBar, Spinner, Toast } from '../components/UI'
 
@@ -29,7 +29,7 @@ export default function AddCustomer() {
 
     setLoading(true)
     try {
-      const { data } = await api.post('/api/customers', {
+      const { data } = await apiPost('/api/customers', {
         name: name.trim(),
         phone: phone.trim(),
         location_label: location.trim(),

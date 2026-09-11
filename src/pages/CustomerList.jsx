@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../lib/api'
+import { apiGet, apiPost, apiPatch, apiDelete } from '../lib/api'
 import { useToast } from '../hooks/useToast'
 import { TopBar, BottomNav, Icon, Avatar, Toast, Spinner, EmptyState } from '../components/UI'
 
@@ -17,7 +17,7 @@ export default function CustomerList() {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const { data } = await api.get('/api/customers')
+        const { data } = await apiGet('/api/customers')
         setCustomers(data.customers || [])
       } catch (err) {
         error('Failed to load customers')

@@ -1,5 +1,38 @@
 # 🎯 Supabase Integration Complete - Action Items
 
+## 🚀 Launch Readiness Checklist
+
+### Verified in current build
+
+- [x] App builds successfully with `npm run build`
+- [x] Local preview loads on a clean Vite port
+- [x] Login flow works with skip-login preview path
+- [x] Customer creation flow works and routes to the new customer detail
+- [x] Customer detail and basic customer data render correctly
+- [x] Reminders page loads without runtime errors
+- [x] Profile page loads and supports editing/saving
+- [x] Homepage dashboard loads and shows overview content
+- [x] Supabase environment values are present in `.env.local`
+- [x] Core API fallback logic protects pages during backend inconsistencies
+
+### Release gate before launch
+
+- [ ] Final smoke test on deployed Netlify URL using real environment values
+- [ ] Verify WhatsApp reminder sending and job receipt flow in production
+- [ ] Confirm all critical routes work in a fresh browser session without stale Vite state
+- [ ] Test an actual OTP login flow with live Supabase auth
+- [ ] Verify reminder, profile, and customer update actions against the real backend schema
+- [ ] Test job creation with photo upload + receipt screen in production-like conditions
+- [ ] Check mobile layout and touch targets on iPhone/Android sizes
+- [ ] Validate build and deploy secrets in GitHub/Netlify settings
+- [ ] Confirm production environment variables match the expected Supabase project
+- [ ] Perform final sign-off with product owner or business owner before public launch
+
+### Known non-blocking warnings
+
+- [ ] React Router future-flag warnings are visible in the console but do not currently block the app
+- [ ] These warnings can be cleaned up later by enabling the v7 future flags in the router setup
+
 ## ✅ All Configuration Done
 
 ### Environment Files

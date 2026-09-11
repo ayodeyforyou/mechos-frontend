@@ -1,135 +1,242 @@
+// src/pages/Login.jsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
-import { useToast } from '../hooks/useToast'
-import { supabaseAuth } from '../lib/supabase'
-import { Toast, Spinner } from '../components/UI'
+
+const DEV_MODE = import.meta.env.DEV // true on localhost, false on Netlify
 
 export default function Login() {
-  const navigate = useNavigate()
-  const { login } = useAuth()
-  const { toast, error, success } = useToast()
-
-  const [step, setStep] = useState('phone') // 'phone' or 'otp'
-  const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
+  const [step, setStep]       = useState('phone')
+  const [phone, setPhone]     = useState('')
+  const [otp, setOtp]         = useState('')
   const [loading, setLoading] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
+  const [error, setError]     = useState('')
+  const { login }             = useAuth()
+  const navigate              = useNavigate()
 
-  const handleRequestOtp = async () => {
-    setErrorMsg('')
-    if (!phone.trim()) {
-      setErrorMsg('Phone number is required')
-      return
-    }
-
-    setLoading(true)
-    try {
-      // Use Supabase SDK for OTP
-      await supabaseAuth.requestOtp(phone)
-      success('OTP sent to your phone!')
-      setStep('otp')
-    } catch (err) {
-      setErrorMsg(err.message || 'Failed to send OTP')
-    } finally {
-      setLoading(false)
-    }
+  // ── DEV ONLY: skip straight into the app with fake mechanic data ──
+  const skipLogin = () => {
+    login('dev-token-skip', {
+      id:            'dev-mechanic-001',
+      name:          'Emeka Okafor',
+      phone:         '08034567890',
+      business_name: "Emeka's Auto Repairs",
+      specialty:     'General & Engine',
+      plan:          'pro',
+    })
+    navigate('/', { replace: true })
   }
 
-  const handleVerifyOtp = async () => {
-    setErrorMsg('')
-    if (!otp.trim()) {
-      setErrorMsg('OTP is required')
-      return
-    }
-
-    setLoading(true)
+  const handleRequestOTP = async (e) => {
+    e.preventDefault()
+    if (!phone.trim()) return setError('Enter your phone number')
+    setError(''); setLoading(true)
     try {
-      // Verify OTP via Supabase SDK
-      const response = await supabaseAuth.verifyOtp(phone, otp)
-      
-      // Create mechanic object from Supabase user
-      const mechanic = {
-        id: response.user?.id,
-        phone: response.user?.phone,
-        email: response.user?.email
-      }
-      
-      login(response.token, mechanic)
-      navigate('/')
+      const res = await fetch('/auth/request-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phone.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setStep('otp')
     } catch (err) {
-      setErrorMsg(err.message || 'Invalid OTP')
-    } finally {
-      setLoading(false)
-    }
+      setError(err.message || 'Could not send OTP — is the backend running?')
+    } finally { setLoading(false) }
+  }
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault()
+    if (otp.length < 6) return setError('Enter the 6-digit code')
+    setError(''); setLoading(true)
+    try {
+      const res = await fetch('/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phone.trim(), otp }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      login(data.token, data.mechanic)
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(err.message || 'Wrong code — try again')
+    } finally { setLoading(false) }
   }
 
   return (
-    <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
-      <div style={{ width: '100%', maxWidth: 400, padding: 24 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, color: 'var(--brand-green)' }}>MechOS</h1>
-        <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 32 }}>Mobile mechanic management</p>
+    <div style={{
+      minHeight: '100dvh',
+      background: 'var(--bg)',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
 
-        {step === 'phone' ? (
-          <>
-            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Your phone number</h2>
-            <div className="field">
-              <input
-                type="tel"
-                inputMode="tel"
-                placeholder="0803 456 7890"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                className="field-input"
-                autoFocus
-              />
-            </div>
-            {errorMsg && <span className="field-error">{errorMsg}</span>}
-            <button
-              className="btn-primary"
-              onClick={handleRequestOtp}
-              disabled={loading}
-              style={{ marginTop: 16 }}
-            >
-              {loading ? <Spinner /> : 'Send OTP →'}
-            </button>
-          </>
-        ) : (
-          <>
-            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Enter the 6-digit code</h2>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>Sent to {phone}</p>
-            <div className="field">
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="000000"
-                maxLength="6"
-                value={otp}
-                onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                className="otp-input"
-                autoFocus
-              />
-            </div>
-            {errorMsg && <span className="field-error">{errorMsg}</span>}
-            <button
-              className="btn-primary"
-              onClick={handleVerifyOtp}
-              disabled={loading}
-              style={{ marginTop: 16 }}
-            >
-              {loading ? <Spinner /> : 'Verify →'}
-            </button>
-            <button
-              className="btn-secondary"
-              onClick={() => setStep('phone')}
-              style={{ marginTop: 8 }}
-            >
-              Back
-            </button>
-          </>
-        )}
+      {/* Green hero */}
+      <div style={{
+        background: 'var(--green)',
+        padding: '48px 24px 40px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 8,
+      }}>
+        <div style={{ fontSize: 52 }}>🔧</div>
+        <h1 style={{
+          color: '#fff',
+          fontSize: 30,
+          fontWeight: 800,
+          letterSpacing: '-0.5px',
+          margin: 0,
+        }}>
+          MechOS
+        </h1>
+        <p style={{
+          color: 'rgba(255,255,255,0.85)',
+          fontSize: 14,
+          textAlign: 'center',
+          margin: 0,
+        }}>
+          Never lose a customer or forget a repair again
+        </p>
       </div>
-      <Toast toast={toast} />
+
+      {/* Form area */}
+      <div style={{ flex: 1, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+        {/* DEV SKIP BUTTON — only shows on localhost */}
+        {DEV_MODE && (
+          <button
+            onClick={skipLogin}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              width: '100%',
+              padding: '14px 16px',
+              background: '#1a1a18',
+              color: '#fff',
+              fontSize: 15,
+              fontWeight: 600,
+              border: 'none',
+              borderRadius: 12,
+              cursor: 'pointer',
+              minHeight: 52,
+            }}
+          >
+            ⚡ Skip login — preview app
+          </button>
+        )}
+
+        {/* Divider */}
+        {DEV_MODE && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            color: 'var(--text-hint)',
+            fontSize: 12,
+          }}>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+            or log in with phone
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          </div>
+        )}
+
+        {/* Login card */}
+        <div className="card" style={{ padding: 20 }}>
+          {step === 'phone' ? (
+            <form
+              onSubmit={handleRequestOTP}
+              style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+            >
+              <div>
+                <h2 style={{ fontSize: 20, marginBottom: 4 }}>Welcome</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+                  Enter your phone number to get started
+                </p>
+              </div>
+
+              <div className="field">
+                <label className="field-label">Phone number</label>
+                <input
+                  className="field-input"
+                  type="tel"
+                  inputMode="tel"
+                  placeholder="e.g. 0803 456 7890"
+                  value={phone}
+                  onChange={e => { setPhone(e.target.value); setError('') }}
+                  autoFocus
+                />
+              </div>
+
+              {error && (
+                <p style={{ color: 'var(--red)', fontSize: 13, margin: 0 }}>{error}</p>
+              )}
+
+              <button className="btn-primary" type="submit" disabled={loading}>
+                {loading ? 'Sending…' : 'Get code →'}
+              </button>
+            </form>
+          ) : (
+            <form
+              onSubmit={handleVerifyOTP}
+              style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+            >
+              <div>
+                <h2 style={{ fontSize: 20, marginBottom: 4 }}>Enter your code</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+                  Sent to <strong>{phone}</strong>
+                </p>
+              </div>
+
+              <input
+                className="otp-input"
+                type="number"
+                inputMode="numeric"
+                placeholder="——————"
+                maxLength={6}
+                value={otp}
+                onChange={e => { setOtp(e.target.value.slice(0, 6)); setError('') }}
+                autoFocus
+              />
+
+              {error && (
+                <p style={{ color: 'var(--red)', fontSize: 13, margin: 0 }}>{error}</p>
+              )}
+
+              <button className="btn-primary" type="submit" disabled={loading}>
+                {loading ? 'Checking…' : 'Confirm →'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setStep('phone'); setOtp(''); setError('') }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  padding: 8,
+                }}
+              >
+                ← Wrong number?
+              </button>
+            </form>
+          )}
+        </div>
+
+        <p style={{
+          textAlign: 'center',
+          color: 'var(--text-hint)',
+          fontSize: 12,
+          marginTop: 8,
+        }}>
+          Your customer data is private — only you can see it
+        </p>
+      </div>
     </div>
   )
 }

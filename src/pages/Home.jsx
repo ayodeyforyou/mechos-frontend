@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../lib/api'
+import { apiGet, apiPost, apiPatch, apiDelete } from '../lib/api'
 import { useAuth } from '../lib/AuthContext'
 import { useToast } from '../hooks/useToast'
 import { TopBar, BottomNav, Icon, Avatar, fmt, Toast, Spinner, EmptyState } from '../components/UI'
@@ -16,7 +16,7 @@ export default function Home() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const { data: result } = await api.get('/api/dashboard')
+        const { data: result } = await apiGet('/api/dashboard')
         setData(result)
       } catch (err) {
         error('Failed to load dashboard')
@@ -33,7 +33,7 @@ export default function Home() {
   const firstName = mechanic?.name?.split(' ')[0] || 'Mechanic'
 
   return (
-    <div className="page">
+    <div className="page home-page">
       <TopBar
         title="MechOS"
         right={
@@ -47,11 +47,14 @@ export default function Home() {
         }
       />
 
-      <div className="page-content">
-        {/* Greeting */}
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4, marginTop: 16 }}>
-          Welcome back, {firstName}! 👋
-        </h1>
+      <div className="page-content home-content">
+        <div className="dashboard-hero">
+          <div className="dashboard-hero__badge">Live overview</div>
+          <h1>
+            Welcome back, {firstName}! 👋
+          </h1>
+          <p>Keep every repair, reminder and customer in one place.</p>
+        </div>
 
         {/* Alert if reminders due */}
         {data?.reminders_due > 0 && (

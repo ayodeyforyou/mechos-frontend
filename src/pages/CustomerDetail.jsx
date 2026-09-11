@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import api from '../lib/api'
+import { apiGet, apiPost, apiPatch, apiDelete } from '../lib/api'
 import { useToast } from '../hooks/useToast'
 import { TopBar, BottomNav, Icon, Avatar, fmt, Toast, Spinner, EmptyState } from '../components/UI'
 
@@ -15,7 +15,7 @@ export default function CustomerDetail() {
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
-        const { data } = await api.get(`/api/customers/${id}`)
+        const { data } = await apiGet(`/api/customers/${id}`)
         setCustomer(data)
       } catch (err) {
         error('Failed to load customer')

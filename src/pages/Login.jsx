@@ -2,8 +2,21 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
+import { supabaseAuth } from '../lib/supabase'
 
 const DEV_MODE = import.meta.env.DEV // true on localhost, false on Netlify
+const useSupabaseOtp = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
+
+const readJsonSafely = async (res) => {
+  const text = await res.text()
+  if (!text) return null
+
+  try {
+    return JSON.parse(text)
+  } catch {
+    return null
+  }
+}
 
 export default function Login() {
   const [step, setStep]       = useState('phone')
@@ -31,14 +44,29 @@ export default function Login() {
     e.preventDefault()
     if (!phone.trim()) return setError('Enter your phone number')
     setError(''); setLoading(true)
+
     try {
+      if (useSupabaseOtp) {
+        await supabaseAuth.requestOtp(phone.trim())
+        setStep('otp')
+        return
+      }
+
       const res = await fetch('/auth/request-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phone.trim() }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      const data = await readJsonSafely(res)
+
+      if (!res.ok) {
+        throw new Error(data?.error || 'Could not send OTP — is the backend running?')
+      }
+
+      if (!data) {
+        throw new Error('The server returned an empty response. Please try again.')
+      }
+
       setStep('otp')
     } catch (err) {
       setError(err.message || 'Could not send OTP — is the backend running?')
@@ -49,14 +77,38 @@ export default function Login() {
     e.preventDefault()
     if (otp.length < 6) return setError('Enter the 6-digit code')
     setError(''); setLoading(true)
+
     try {
+      if (useSupabaseOtp) {
+        const { token, user } = await supabaseAuth.verifyOtp(phone.trim(), otp.trim())
+        const mechanicData = {
+          id: user.id,
+          name: user.user_metadata?.full_name || user.phone || phone.trim(),
+          phone: user.phone || phone.trim(),
+          business_name: '',
+          specialty: '',
+          plan: 'free',
+        }
+        login(token, mechanicData)
+        navigate('/', { replace: true })
+        return
+      }
+
       const res = await fetch('/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phone.trim(), otp }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      const data = await readJsonSafely(res)
+
+      if (!res.ok) {
+        throw new Error(data?.error || 'Wrong code — try again')
+      }
+
+      if (!data?.token || !data?.mechanic) {
+        throw new Error('The server returned an invalid verification response.')
+      }
+
       login(data.token, data.mechanic)
       navigate('/', { replace: true })
     } catch (err) {
